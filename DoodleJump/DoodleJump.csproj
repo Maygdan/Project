@@ -4,8 +4,7 @@
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
   <ItemGroup>
-  <!-- Это заставит программу видеть все файлы в папке Assets как ресурсы -->
-  <Resource Include="Assets\**" />
+  <Resource Include="Assets\**" />  <!-- папка Assets  -->
 </ItemGroup>  
 
   <PropertyGroup>

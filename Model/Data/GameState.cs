@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Model.Data
 {
-    [Serializable] // Нужно для XML сериализации
+    [Serializable] 
     public class PlatformSaveData
     {
         public double X { get; set; }

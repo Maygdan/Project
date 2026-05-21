@@ -21,7 +21,7 @@ namespace DoodleJump.Views
     CheckSaveFile(); // Теперь он проверит путь из _config.SavePath
 }
 
-        private void LoadOrCreateConfig()
+private void LoadOrCreateConfig()
 {
     if (File.Exists("config.json")) {
         _config = _configSer.Deserialize("config.json");
@@ -30,6 +30,8 @@ namespace DoodleJump.Views
         SaveConfig();
     }
 }
+
+        
 
         private void SaveConfig() => _configSer.Serialize("config.json", _config);
 

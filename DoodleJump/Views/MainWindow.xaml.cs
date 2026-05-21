@@ -93,8 +93,8 @@ namespace DoodleJump.Views
 
             _engine.Update(deltaTime);
 
-            // Обновляем очки в UI (убедись, что в XAML есть x:Name="TxtScore")
-            if (TxtScore != null) TxtScore.Text = ((int)_engine.Score).ToString();
+            // Обновляем очки на экране
+            TxtScore.Text = ((int)_engine.Score).ToString();
 
             if (_engine.Player.VelocityY < 0 && _engine.Player.Y <= GameEngine.CanvasHeight / 2)
             {
@@ -122,19 +122,17 @@ namespace DoodleJump.Views
         }
 
         private void ScrollBackground(double scrollY)
-{
-    // Лес движется на 0.1% (в 10 раз медленнее, чем раньше)
-    _forestOffset += scrollY * 0.001; 
-    if (_forestOffset >= 850) _forestOffset = 0;
-    Canvas.SetTop(Forest1, _forestOffset);
-    Canvas.SetTop(Forest2, _forestOffset - 850);
+        {
+             _forestOffset += scrollY * 0.001; // Почти незаметно
+            if (_forestOffset >= 1000) _forestOffset = 0;
+            Canvas.SetTop(Forest1, _forestOffset);
+            Canvas.SetTop(Forest2, _forestOffset - 1000);
 
-    // Туман движется на 0.02% (практически стоит на месте)
-    _fogOffset += scrollY * 0.0002; 
-    if (_fogOffset >= 850) _fogOffset = 0;
-    Canvas.SetTop(Fog1, _fogOffset);
-    Canvas.SetTop(Fog2, _fogOffset - 850);
-}
+            _fogOffset += scrollY * 0.0002;  // Практически стоит на месте
+            if (_fogOffset >= 1000) _fogOffset = 0;
+            Canvas.SetTop(Fog1, _fogOffset);
+            Canvas.SetTop(Fog2, _fogOffset - 1000);
+        }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
@@ -155,6 +153,7 @@ namespace DoodleJump.Views
 
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
+            // Берем текущие настройки для окна
             var currentConfig = new AppConfig { SavePath = _savePath, UseXml = _useXml };
             var settingsWin = new SettingsWindow(currentConfig);
             settingsWin.Owner = this;
@@ -162,6 +161,7 @@ namespace DoodleJump.Views
             {
                 _savePath = currentConfig.SavePath;
                 _useXml = currentConfig.UseXml;
+                // Сохраняем в файл, чтобы не потерять при выходе
                 new JsonGameSerializer<AppConfig>().Serialize("config.json", currentConfig);
             }
         }
@@ -184,43 +184,50 @@ namespace DoodleJump.Views
             CleanupVisuals();
         }
 
-        private void UpdateOrCreateVisual(GameObject obj, Brush fallbackColor)
-        {
-            if (!_visuals.ContainsKey(obj))
-            {
-                Image img = new Image();
-                string imageName = "short_platform.png"; 
+        
+private void UpdateOrCreateVisual(GameObject obj, Brush fallbackColor)
+{
+    if (!_visuals.ContainsKey(obj))
+    {
+        Image img = new Image();
+        string imageName = "short_platform.png"; 
 
-                if (obj is Player) imageName = "Knight.png";
-                else if (obj is TrapPlatform) imageName = "broken.png";
-                else if (obj is SpringPlatform) imageName = "group3.png";
-                else if (obj is Platform platBase) {
-                    if (platBase.Width > 100) imageName = "long_platform.png";
-                    else if (platBase.Width > 70) imageName = "middle_platform.png";
-                }
+        if (obj is Player) {
+            imageName = "Knight.png";
+            img.Width = 85;  // Визуальный размер рыцаря
+            img.Height = 100;
+        } else if (obj is Platform p) {
+            if (obj is TrapPlatform) imageName = "broken.png";
+            else if (obj is SpringPlatform) imageName = "group3.png";
+            else if (p.Width > 120) imageName = "long_platform.png";
+            else if (p.Width > 80) imageName = "middle_platform.png";
+            else imageName = "short_platform.png";
 
-                img.Source = new BitmapImage(new Uri($"/Assets/{imageName}", UriKind.Relative));
-                img.Width = (obj is Player) ? 80 : (obj.Width * 1.6);
-                img.Height = (obj is Player) ? 95 : 150;
-                
-                _visuals[obj] = img;
-                GameCanvas.Children.Add(img);
-            }
+            img.Width = p.Width * 1.5; 
+            img.Height = 150; // Высокая из-за лиан
+        }
+        img.Source = new BitmapImage(new Uri($"/Assets/{imageName}", UriKind.Relative));
+        _visuals[obj] = img;
+        GameCanvas.Children.Add(img);
+    }
 
-               var visual = (Image)_visuals[obj];
+    var visual = (Image)_visuals[obj];
     double offsetX = (visual.Width - obj.Width) / 2;
 
-    if (obj is Player) {
-        // Ставим картинку рыцаря так, чтобы его НОГИ были на линии хитбокса
+    if (obj is Player playerObj) {
         Canvas.SetLeft(visual, obj.X - offsetX);
-        Canvas.SetTop(visual, obj.Y - visual.Height + obj.Height); 
+        // Магия позиционирования: хитбокс (ноги) совмещается с низом картинки + небольшой отступ вверх (12)
+        Canvas.SetTop(visual, obj.Y - (visual.Height - obj.Height) + 12); 
+
+        if (playerObj.VelocityX < 0) visual.RenderTransform = new ScaleTransform(-1, 1); 
+        else if (playerObj.VelocityX > 0) visual.RenderTransform = new ScaleTransform(1, 1);
+        visual.RenderTransformOrigin = new Point(0.5, 0.5);
     } else {
-        // Ставим картинку платформы так, чтобы КАМЕНЬ был на линии хитбокса
         Canvas.SetLeft(visual, obj.X - offsetX);
-        // -25 пикселей поднимет картинку, чтобы хитбокс (линия прыжка) был на поверхности мха
+        // Каменная часть платформы находится чуть выше хитбокса
         Canvas.SetTop(visual, obj.Y - 25); 
     }
-        }
+}
 
         private void CleanupVisuals()
         {

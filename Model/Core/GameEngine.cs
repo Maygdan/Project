@@ -32,25 +32,24 @@ namespace Model.Core
             GenerateInitialPlatforms();
         }
 
-        private void GenerateInitialPlatforms()
+       private void GenerateInitialPlatforms()
 {
     Platforms.Clear();
     Random rnd = new Random();
     
-    // 1. Стартовая площадка (Земля)
-    double currentY = CanvasHeight - 100;
+    // Ставим первую платформу на высоте 700 (при окне 850 её будет отлично видно)
+    double currentY = CanvasHeight - 150; 
     Platforms.Add(new NormalPlatform(CanvasWidth / 2 - 75, currentY, 3)); 
 
-    Player.X = CanvasWidth / 2 - 12;
-    Player.Y = currentY - 50;
+    Player.X = CanvasWidth / 2 - 17;
+    Player.Y = currentY - 80; // Ставим игрока над платформой
     Player.VelocityY = 0;
 
-    // 2. Генерируем всего 4 платформы вверх с шагом 220-280 пикселей
-    // Этого достаточно, чтобы заполнить первый экран без каши
-    for (int i = 0; i < 4; i++)
+    // Генерируем 6 платформ с проходимым шагом
+    for (int i = 0; i < 6; i++)
     {
-        currentY -= rnd.Next(220, 280); 
-        double x = rnd.Next(40, (int)CanvasWidth - 160);
+        currentY -= rnd.Next(180, 230); 
+        double x = rnd.Next(50, (int)CanvasWidth - 160);
         Platforms.Add(new NormalPlatform(x, currentY, rnd.Next(1, 4)));
     }
 }
@@ -61,7 +60,7 @@ namespace Model.Core
 
             Player.Update(deltaTime);
 
-            // 1. Проверка на вылет за границы (Закольцованность экрана)
+            // 1. (Закольцованность экрана)
             if (Player.X + Player.Width < 0) Player.X = CanvasWidth;
             if (Player.X > CanvasWidth) Player.X = -Player.Width;
 
@@ -75,21 +74,19 @@ namespace Model.Core
              if (Player.Y > CanvasHeight)
         {
             IsGameOver = true;
-            OnGameOver?.Invoke(); // Уведомляем всех подписавшихся
+            OnGameOver?.Invoke(); 
         }
         }
 
       private void CheckCollisions()
 {
-    if (Player.VelocityY > 0) // Прыгаем только при ПАДЕНИИ
+    if (Player.VelocityY > 0) // Только при падении!
     {
         foreach (var platform in Platforms)
         {
             if (!platform.IsActive) continue;
 
-            // СТРОГАЯ ПРОВЕРКА:
-            // 1. Ноги игрока по Y находятся в пределах верхней кромки платформы (зазор 15 пикселей)
-            // 2. Игрок по горизонтали (X) находится внутри платформы
+            // Если ноги игрока находятся в пределах верхней грани платформы (зазор 15 пикс)
             if (Player.Y + Player.Height >= platform.Y && 
                 Player.Y + Player.Height <= platform.Y + 15 && 
                 Player.X + Player.Width > platform.X && 

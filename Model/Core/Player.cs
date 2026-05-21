@@ -2,36 +2,27 @@ using Model.Core.Interfaces;
 
 namespace Model.Core
 {
-    public class Player : GameObject, IUpdatable
+    namespace Model.Core
+{
+    public class Player : GameObject
     {
-        public double VelocityY { get; set; } // Скорость по вертикали
-        public double VelocityX { get; set; } // Скорость по горизонтали
+        public double VelocityY { get; set; }
+        public double VelocityX { get; set; }
         
-        private const double Gravity = 1200; // Сила гравитации (пикселей в сек^2)
-        private const double JumpForce = -750; // Сила прыжка (отрицательная, т.к. в WPF 0 вверху)
+        private const double Gravity = 1200; 
+        private const double JumpForce = -700; // Усиленный прыжок для больших дистанций
 
-        public Player(double x, double y) : base(x, y, 25, 10) { }
+        // Хитбокс 35x15 — это область в районе ног рыцаря
+        public Player(double x, double y) : base(x, y, 35, 15) { }
 
         public override void Update(double deltaTime)
         {
-            // Применяем гравитацию к скорости
             VelocityY += Gravity * deltaTime;
-            
-            // Обновляем позицию на основе скорости
             Y += VelocityY * deltaTime;
             X += VelocityX * deltaTime;
         }
 
-        public void Jump()
-{
-    VelocityY = -750;
-}
-
-// Перегрузка метода Jump (Метод 2): Прыжок с заданной силой
-// Это закроет пункт "Перегрузка методов" в чек-листе
-public void Jump(double customForce)
-{
-    VelocityY = -Math.Abs(customForce);
-}
+        public void Jump() => VelocityY = JumpForce;
+        public void Jump(double force) => VelocityY = -Math.Abs(force);
     }
 }
