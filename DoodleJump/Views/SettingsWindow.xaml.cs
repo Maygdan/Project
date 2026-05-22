@@ -38,28 +38,20 @@ namespace DoodleJump.Views
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
 {
-    // Проверяем, изменился ли формат
-    string oldPath = Path.Combine(_config.SavePath, "savegame" + (_config.UseXml ? ".json" : ".xml"));
-    string newPath = Path.Combine(_config.SavePath, "savegame" + (_config.UseXml ? ".xml" : ".json"));
+    string oldPath = System.IO.Path.Combine(_config.SavePath, "savegame" + (_config.UseXml ? ".json" : ".xml"));
+    string newPath = System.IO.Path.Combine(_config.SavePath, "savegame" + (_config.UseXml ? ".xml" : ".json"));
 
     // ТЗ: Копируем данные при смене формата
     if (File.Exists(oldPath) && !File.Exists(newPath))
     {
-        try 
-        {
-            // Читаем из старого формата, сохраняем в новый
-            GameState state;
-            if (!_config.UseXml) // формат был XML, стал JSON
-                state = new XmlGameSerializer<GameState>().Deserialize(oldPath);
-            else // формат был JSON, стал XML
-                state = new JsonGameSerializer<GameState>().Deserialize(oldPath);
+        try {
+            GameState state = !_config.UseXml 
+                ? new XmlGameSerializer<GameState>().Deserialize(oldPath)
+                : new JsonGameSerializer<GameState>().Deserialize(oldPath);
 
-            if (_config.UseXml)
-                new XmlGameSerializer<GameState>().Serialize(newPath, state);
-            else
-                new JsonGameSerializer<GameState>().Serialize(newPath, state);
-        }
-        catch { /* Если файл битый, просто не копируем */ }
+            if (_config.UseXml) new XmlGameSerializer<GameState>().Serialize(newPath, state);
+            else new JsonGameSerializer<GameState>().Serialize(newPath, state);
+        } catch { }
     }
 
     _configSer.Serialize("config.json", _config);

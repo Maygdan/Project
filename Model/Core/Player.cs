@@ -1,23 +1,20 @@
-using Model.Core.Interfaces;
-
 namespace Model.Core
-{
-    namespace Model.Core
 {
     public class Player : GameObject
     {
         public double VelocityY { get; set; }
         public double VelocityX { get; set; }
         
-        private const double Gravity = 1200; 
-        private const double JumpForce = -700; // Усиленный прыжок для больших дистанций
+        private const double Gravity = 1150; 
+        private const double JumpForce = -950; // Сила, чтобы точно долетать
 
-        // Хитбокс 35x15 — это область в районе ног рыцаря
-        public Player(double x, double y) : base(x, y, 35, 15) { }
+        public Player(double x, double y) : base(x, y, 35, 15) { } // Хитбокс только в ногах
 
         public override void Update(double deltaTime)
         {
             VelocityY += Gravity * deltaTime;
+            if (VelocityY > 1250) VelocityY = 1250; // Лимит скорости падения (защита от пролета сквозь пол)
+
             Y += VelocityY * deltaTime;
             X += VelocityX * deltaTime;
         }

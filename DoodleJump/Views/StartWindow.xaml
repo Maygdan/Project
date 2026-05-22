@@ -1,96 +1,58 @@
 <Window x:Class="DoodleJump.Views.StartWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Doodle Knight - Menu" Height="750" Width="500"
+        Title="Doodle Knight - Menu" Height="850" Width="500"
         WindowStartupLocation="CenterScreen">
     
-    <Window.Resources>
-        <!-- СТИЛЬ КНОПОК (в стиле Hollow Knight) -->
-        <Style x:Key="HollowButton" TargetType="Button">
-            <Setter Property="Background" Value="#22000000"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="18"/>
-            <Setter Property="FontWeight" Value="Light"/>
-            <Setter Property="BorderBrush" Value="#88FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,10"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="2">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#44FFFFFF"/>
-                                <Setter Property="BorderBrush" Value="White"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="White" BlurRadius="10" ShadowDepth="0"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
     <Grid>
-    <!-- ФОН МЕНЮ -->
-    <Image Source="/Assets/DeepFog.png" Stretch="UniformToFill">
-        <Image.Effect><BlurEffect Radius="5"/></Image.Effect>
-    </Image>
-    <Rectangle Fill="Black" Opacity="0.5"/>
+        <!-- ФОН МЕНЮ -->
+        <Image Source="/Assets/DeepFog.png" Stretch="UniformToFill">
+            <Image.Effect><BlurEffect Radius="5"/></Image.Effect>
+        </Image>
+        <Rectangle Fill="Black" Opacity="0.5"/>
 
-    <!-- КНОПКА НАСТРОЕК (ВЕРХНИЙ ЛЕВЫЙ УГОЛ) -->
-    <Button Click="BtnSettings_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
-            Style="{StaticResource HollowButton}" Width="45" Height="45" Content="⚙" 
-            FontSize="22" BorderThickness="0.5" Opacity="0.7"/>
+        <!-- КНОПКИ В УГЛАХ -->
+        <Button Click="BtnSettings_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20"
+                Style="{StaticResource HollowButton}" Width="45" Height="45" Content="⚙" 
+                FontSize="22" BorderThickness="0.5" Opacity="0.7"/>
 
-    <!-- КНОПКА ВЫХОДА (ВЕРХНИЙ ПРАВЫЙ УГОЛ) -->
-    <Button Click="BtnExitApp_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20"
-            Style="{StaticResource HollowButton}" Width="45" Height="45" Content="X" 
-            FontSize="18" BorderThickness="0.5" Opacity="0.7"/>
+        <Button Click="BtnExitApp_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20"
+                Style="{StaticResource HollowButton}" Width="45" Height="45" Content="X" 
+                FontSize="18" BorderThickness="0.5" Opacity="0.7"/>
 
-    <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
-    <StackPanel Margin="60,80,60,20" VerticalAlignment="Stretch">
-        
-        <TextBlock Text="DOODLE KNIGHT" FontSize="42" HorizontalAlignment="Center" 
-                   Foreground="White" FontWeight="Thin" Margin="0,0,0,30">
-            <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="10" Color="White" Opacity="0.3" ShadowDepth="0"/>
-            </TextBlock.Effect>
-        </TextBlock>
+        <!-- ЦЕНТРАЛЬНЫЙ КОНТЕНТ -->
+        <StackPanel Margin="60,80,60,20" VerticalAlignment="Stretch">
+            
+            <TextBlock Text="DOODLE KNIGHT" FontSize="42" HorizontalAlignment="Center" 
+                       Foreground="White" FontWeight="Thin" Margin="0,0,0,30">
+                <TextBlock.Effect>
+                    <DropShadowEffect BlurRadius="10" Color="White" Opacity="0.3" ShadowDepth="0"/>
+                </TextBlock.Effect>
+            </TextBlock>
 
-       <TextBlock Text="ТОП 10 РЕКОРДОВ" FontSize="12" Foreground="LightGray" 
-           HorizontalAlignment="Center" Margin="0,0,0,10" Opacity="0.6"/>
-        
-        <DataGrid x:Name="GridScores" Height="240" Margin="0,0,0,40" 
-                  Background="Transparent" Foreground="White" BorderThickness="0" 
-                  IsReadOnly="True" AutoGenerateColumns="False" RowBackground="Transparent"
-                  HeadersVisibility="Column" GridLinesVisibility="None"
-                  VerticalScrollBarVisibility="Disabled" RowHeaderWidth="0">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="СЧЁТ" Binding="{Binding Score}" Width="*" />
-                <DataGridTextColumn Header="СЛОЖНОСТЬ" Binding="{Binding Difficulty}" Width="*" />
-            </DataGrid.Columns>
-        </DataGrid>
+            <TextBlock Text="ТОП 10 РЕКОРДОВ" FontSize="12" Foreground="LightGray" 
+                       HorizontalAlignment="Center" Margin="0,0,0,10" Opacity="0.6"/>
+            
+            <DataGrid x:Name="GridScores" Height="220" Margin="0,0,0,40" 
+                      Background="Transparent" Foreground="White" BorderThickness="0" 
+                      IsReadOnly="True" AutoGenerateColumns="False" RowBackground="Transparent"
+                      HeadersVisibility="Column" GridLinesVisibility="None"
+                      VerticalScrollBarVisibility="Disabled" RowHeaderWidth="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="РЕЙТИНГ (СЧЁТ)" Binding="{Binding Score}" Width="*" />
+                    <DataGridTextColumn Header="СЛОЖНОСТЬ" Binding="{Binding Difficulty}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-        <TextBlock Text="УРОВЕНЬ СЛОЖНОСТИ" FontSize="11" Foreground="White" Opacity="0.5" HorizontalAlignment="Center"/>
-        <Slider x:Name="SliderDifficulty" Minimum="1" Maximum="5" Value="1" 
-                TickFrequency="1" IsSnapToTickEnabled="True" Margin="40,10,40,40"/>
+            <TextBlock Text="УРОВЕНЬ СЛОЖНОСТИ" FontSize="11" Foreground="White" Opacity="0.5" HorizontalAlignment="Center"/>
+            <Slider x:Name="SliderDifficulty" Minimum="1" Maximum="5" Value="1" 
+                    TickFrequency="1" IsSnapToTickEnabled="True" Margin="40,10,40,40"/>
 
-        <Button x:Name="BtnNewGame" Content="НОВАЯ ИГРА" Height="50" 
-                Style="{StaticResource HollowButton}" Click="BtnNewGame_Click" Margin="0,5"/>
-        
-        <Button x:Name="BtnContinue" Content="ПРОДОЛЖИТЬ" Height="50" 
-                Style="{StaticResource HollowButton}" Click="BtnContinue_Click" Margin="0,5"/>
-    </StackPanel>
-</Grid>
+            <Button x:Name="BtnNewGame" Content="НОВАЯ ИГРА" Height="50" 
+                    Style="{StaticResource HollowButton}" Click="BtnNewGame_Click" Margin="0,5"/>
+            
+            <Button x:Name="BtnContinue" Content="ПРОДОЛЖИТЬ" Height="50" 
+                    Style="{StaticResource HollowButton}" Click="BtnContinue_Click" Margin="0,5"/>
+        </StackPanel>
+    </Grid>
 </Window>
