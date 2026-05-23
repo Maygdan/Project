@@ -40,13 +40,8 @@ namespace Model.Core
             Player.Y = currentY - 80;
             Player.VelocityY = 0;
 
-            // 2. Генерируем 5 платформ с большим интервалом (убрали многочисленный спавн)
-            for (int i = 0; i < 5; i++)
-            {
-                currentY -= rnd.Next(180, 230); 
-                double x = rnd.Next(50, (int)CanvasWidth - 160);
-                Platforms.Add(new NormalPlatform(x, currentY, rnd.Next(1, 4)));
-            }
+            
+            
         }
 
         public void Update(double deltaTime)

@@ -10,7 +10,6 @@ namespace Model.Data
         public double Y { get; set; }
         public string Type { get; set; } = "";
     }
-
     [Serializable]
     public class GameState
     {

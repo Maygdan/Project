@@ -5,48 +5,54 @@
         WindowStartupLocation="CenterScreen">
     <Grid Background="#FF050A05">
         <Viewbox Stretch="Uniform">
-            <Grid Width="500" Height="850"> <!-- Увеличил высоту до 850 для соответствия GameWorld -->
-                
-                <!-- 1. ИГРОВОЙ МИР -->
-                <Grid x:Name="GameWorld" Width="500" Height="850" ClipToBounds="True">
-                    <!-- СЛОЙ ДАЛЬНЕГО ТУМАНА -->
-                    <Canvas IsHitTestVisible="False">
-                        <Image x:Name="Fog1" Source="/Assets/DeepFog.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="0" Opacity="0.6"/>
-                        <Image x:Name="Fog2" Source="/Assets/DeepFog.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="-850" Opacity="0.6"/>
-                    </Canvas>
+    <Grid Width="500" Height="850">
+        <!-- 1. ИГРОВОЙ МИР -->
+        <Grid x:Name="GameWorld" Width="500" Height="850" ClipToBounds="True">
+            <!-- Фоны и Холст (оставляем как было) -->
+            <Canvas IsHitTestVisible="False">
+                <Image x:Name="Fog1" Source="/Assets/DeepFog.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="0" Opacity="0.6"/>
+                <Image x:Name="Fog2" Source="/Assets/DeepFog.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="-850" Opacity="0.6"/>
+            </Canvas>
+            <Canvas IsHitTestVisible="False">
+                <Image x:Name="Forest1" Source="/Assets/DarkForest.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="0"/>
+                <Image x:Name="Forest2" Source="/Assets/DarkForest.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="-850"/>
+            </Canvas>
+            <Canvas x:Name="GameCanvas" Background="Transparent" />
+        </Grid>
 
-                    <!-- СЛОЙ ТЕМНОГО ЛЕСА -->
-                    <Canvas IsHitTestVisible="False">
-                        <Image x:Name="Forest1" Source="/Assets/DarkForest.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="0"/>
-                        <Image x:Name="Forest2" Source="/Assets/DarkForest.png" Width="500" Height="850" Stretch="Fill" Canvas.Top="-850"/>
-                    </Canvas>
+        <!-- 2. ИНТЕРФЕЙС ПОВЕРХ ИГРЫ -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,15,0,0">
+            <TextBlock Text="СЧЁТ:" Foreground="White" Opacity="0.5" FontSize="16" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock x:Name="TxtScore" Text="0" Foreground="White" FontSize="26" FontWeight="Thin" VerticalAlignment="Center"/>
+        </StackPanel>
 
-                    <!-- Основной холст -->
-                    <Canvas x:Name="GameCanvas" Background="Transparent" />
-                </Grid>
+        <Button x:Name="BtnPauseIcon" Content="II" Click="BtnPause_Click" 
+                HorizontalAlignment="Right" VerticalAlignment="Top" 
+                Width="45" Height="45" Margin="15" Style="{StaticResource HollowButton}"/>
 
-                <!-- СЧЕТЧИК ОЧКОВ (ТЕПЕРЬ СЛЕВА) -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,15,0,0">
-                    <TextBlock Text="СЧЁТ:" Foreground="White" Opacity="0.5" FontSize="16" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="TxtScore" Text="0" Foreground="White" FontSize="26" FontWeight="Thin" VerticalAlignment="Center"/>
-                </StackPanel>
+        <!-- 3. ЭКРАН ПАУЗЫ -->
+        <Grid x:Name="PauseOverlay" Visibility="Collapsed">
+            <Rectangle Fill="#CC000000"/>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="ПАУЗА" FontSize="50" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,40" FontWeight="Thin"/>
+                <Button Content="ВОЗОБНОВИТЬ" Click="BtnResume_Click" Style="{StaticResource HollowButton}" Width="250"/>
+                <Button Content="НАСТРОЙКИ" Click="BtnSettings_Click" Style="{StaticResource HollowButton}" Width="250"/>
+                <Button Content="В МЕНЮ" Click="BtnExit_Click" Style="{StaticResource HollowButton}" Width="250"/>
+            </StackPanel>
+        </Grid>
 
-                <!-- 2. КНОПКА ПАУЗЫ (СПРАВА) -->
-                <Button x:Name="BtnPauseIcon" Content="II" Click="BtnPause_Click" 
-                        HorizontalAlignment="Right" VerticalAlignment="Top" 
-                        Width="45" Height="45" Margin="15" Style="{StaticResource HollowButton}"/>
-
-                <!-- 3. ЭКРАН ПАУЗЫ -->
-                <Grid x:Name="PauseOverlay" Visibility="Collapsed">
-                    <Rectangle Fill="#CC000000"/>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="ПАУЗА" FontSize="50" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,40" FontWeight="Thin"/>
-                        <Button Content="ВОЗОБНОВИТЬ" Click="BtnResume_Click" Style="{StaticResource HollowButton}" Width="250"/>
-                        <Button Content="НАСТРОЙКИ" Click="BtnSettings_Click" Style="{StaticResource HollowButton}" Width="250"/>
-                        <Button Content="В МЕНЮ" Click="BtnExit_Click" Style="{StaticResource HollowButton}" Width="250"/>
-                    </StackPanel>
-                </Grid>
-            </Grid>
-        </Viewbox>
+        <!-- 4. ЭКРАН ПОРАЖЕНИЯ -->
+        <Grid x:Name="GameOverOverlay" Visibility="Collapsed">
+            <Rectangle Fill="#AA330000"/> <!-- Темно-красное стекло -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="ВЫ ПАЛИ" FontSize="60" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,50" FontWeight="Thin">
+                    <TextBlock.Effect><DropShadowEffect BlurRadius="20" Color="Red" Opacity="0.8"/></TextBlock.Effect>
+                </TextBlock>
+                <Button Content="ЗАНОВО" Click="BtnRestart_Click" Style="{StaticResource HollowButton}" Width="250"/>
+                <Button Content="В МЕНЮ" Click="BtnExit_Click" Style="{StaticResource HollowButton}" Width="250"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Viewbox>
     </Grid>
 </Window>

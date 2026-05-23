@@ -17,18 +17,18 @@ namespace DoodleJump.Views
 {
     public partial class MainWindow : Window
     {
-        private GameEngine _engine;
-        private DateTime _lastFrameTime;
-        private Dictionary<GameObject, UIElement> _visuals = new Dictionary<GameObject, UIElement>();
-        private HashSet<Key> _pressedKeys = new HashSet<Key>(); // Для мгновенного управления
+        private GameEngine _engine; // Движок игры
+        private DateTime _lastFrameTime; // Время прошлого кадра
+        private Dictionary<GameObject, UIElement> _visuals = new Dictionary<GameObject, UIElement>(); // Связь данных и картинок
+        private HashSet<Key> _pressedKeys = new HashSet<Key>(); // Зажатые клавиши
         
-        private string _savePath;
-        private bool _useXml;
+        private string _savePath; // Папка сохранений (Game.saves)
+        private bool _useXml; // Выбранный формат
 
-        private double _forestOffset = 0;
-        private double _fogOffset = 0;
-        private bool _isPaused = false;
-        private List<Ellipse> _fireflies = new List<Ellipse>();
+        private double _forestOffset = 0; // Сдвиг леса
+        private double _fogOffset = 0; // Сдвиг тумана
+        private bool _isPaused = false; // Состояние паузы
+        private List<Ellipse> _fireflies = new List<Ellipse>(); // Светлячки
         private Random _rnd = new Random();
 
         public MainWindow(string? loadPath, bool useXml, int difficulty)
@@ -36,17 +36,17 @@ namespace DoodleJump.Views
             InitializeComponent();
             
             _useXml = useXml;
-            _savePath = loadPath ?? "saves";
-            if (!Directory.Exists(_savePath)) System.IO.Directory.CreateDirectory(_savePath);
+            _savePath = loadPath ?? "Game.saves"; // Папка по умолчанию
+            if (!Directory.Exists(_savePath)) Directory.CreateDirectory(_savePath);
 
             _engine = new GameEngine();
             _engine.Difficulty = difficulty;
 
-            if (loadPath != null) LoadProgress();
+            if (loadPath != null) LoadProgress(); // Загрузка сохранения
 
             this.KeyDown += OnKeyDown;
             this.KeyUp += OnKeyUp;
-            this.Closing += (s, e) => SaveProgress();
+            this.Closing += (s, e) => { if (!_engine.IsGameOver) SaveProgress(); }; // Сохраняем, если не проиграли
 
             CreateFireflies(); 
 
@@ -54,48 +54,7 @@ namespace DoodleJump.Views
             CompositionTarget.Rendering += GameLoop;
         }
 
-        // МГНОВЕННОЕ УПРАВЛЕНИЕ (ТЗ: убираем задержку 0.5с)
-        private void HandleInput()
-        {
-            if (_isPaused) return;
-
-            double speed = 360; // Скорость рыцаря
-            double targetVelocity = 0;
-
-            if (_pressedKeys.Contains(Key.A) || _pressedKeys.Contains(Key.Left))
-                targetVelocity = -speed;
-            else if (_pressedKeys.Contains(Key.D) || _pressedKeys.Contains(Key.Right))
-                targetVelocity = speed;
-
-            _engine.Player.VelocityX = targetVelocity;
-        }
-
-        private void GameLoop(object? sender, EventArgs e)
-        {
-            if (_isPaused || _engine.IsGameOver) 
-            {
-                if (_engine.IsGameOver) HandleGameOver();
-                return;
-            }
-
-            HandleInput(); // Вызываем мгновенную обработку кнопок
-
-            var currentFrameTime = DateTime.Now;
-            double deltaTime = (currentFrameTime - _lastFrameTime).TotalSeconds;
-            _lastFrameTime = currentFrameTime;
-
-            _engine.Update(deltaTime);
-
-            if (TxtScore != null) TxtScore.Text = ((int)_engine.Score).ToString();
-
-            if (_engine.Player.VelocityY < 0 && _engine.Player.Y <= GameEngine.CanvasHeight / 2)
-            {
-                ScrollBackground(Math.Abs(_engine.Player.VelocityY * deltaTime));
-            }
-
-            Draw();
-        }
-
+        // Создание светящихся частиц
         private void CreateFireflies()
         {
             for (int i = 0; i < 15; i++)
@@ -112,6 +71,7 @@ namespace DoodleJump.Views
             }
         }
 
+        // Движение частиц вверх
         private void UpdateFireflies()
         {
             foreach (var f in _fireflies)
@@ -122,16 +82,87 @@ namespace DoodleJump.Views
             }
         }
 
+        // Обработка кнопок без задержки
+        private void HandleInput()
+        {
+            if (_isPaused) return;
+
+            double speed = 360;
+            double targetVelocity = 0;
+
+            if (_pressedKeys.Contains(Key.A) || _pressedKeys.Contains(Key.Left)) targetVelocity = -speed;
+            else if (_pressedKeys.Contains(Key.D) || _pressedKeys.Contains(Key.Right)) targetVelocity = speed;
+
+            _engine.Player.VelocityX = targetVelocity;
+        }
+
+        // Игровой цикл
+        private void GameLoop(object? sender, EventArgs e)
+        {
+            if (_isPaused || _engine.IsGameOver) 
+            {
+                if (_engine.IsGameOver) HandleGameOver();
+                return;
+            }
+
+            HandleInput();
+
+            var currentFrameTime = DateTime.Now;
+            double deltaTime = (currentFrameTime - _lastFrameTime).TotalSeconds;
+            _lastFrameTime = currentFrameTime;
+
+            _engine.Update(deltaTime);
+
+            if (TxtScore != null) TxtScore.Text = ((int)_engine.Score).ToString();
+
+            // Эффект глубины фона
+            if (_engine.Player.VelocityY < 0 && _engine.Player.Y <= GameEngine.CanvasHeight / 2)
+            {
+                ScrollBackground(Math.Abs(_engine.Player.VelocityY * deltaTime));
+            }
+
+            Draw();
+        }
+
+        // --- ЛОГИКА ОКОНЧАНИЯ ИГРЫ (БЕЗ MESSAGEBOX) ---
+
         private void HandleGameOver()
         {
-            CompositionTarget.Rendering -= GameLoop;
-            new ScoreManager().AddScore((int)_engine.Score, _engine.Difficulty);
-            DeleteSave(); 
-            MessageBox.Show($"Игра окончена! Счёт: {(int)_engine.Score}");
-            new StartWindow().Show();
+            if (GameOverOverlay.Visibility == Visibility.Visible) return;
+
+            _isPaused = true; 
+            new ScoreManager().AddScore((int)_engine.Score, _engine.Difficulty); // Запись рекорда
+            
+            DeleteSave(); // ТЗ: Сгорание сессии (удаляем файл)
+
+            // Показываем меню смерти
+            GameOverOverlay.Visibility = Visibility.Visible;
+            BtnPauseIcon.Visibility = Visibility.Collapsed;
+            GameWorld.Effect = new BlurEffect { Radius = 20 }; // Сильное размытие мира
+        }
+
+        // Кнопка "ЗАНОВО" в меню смерти
+        private void BtnRestart_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow newGame = new MainWindow(null, _useXml, _engine.Difficulty);
+            newGame.Show();
             this.Close();
         }
 
+        // Кнопка "В МЕНЮ" (универсальная)
+        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        {
+            // Если игрок ЖИВ (вышел через паузу), сохраняем прогресс
+            if (!_engine.IsGameOver) 
+            {
+                SaveProgress(); 
+            }
+            
+            new StartWindow().Show(); 
+            this.Close();
+        }
+
+        // Удаление сохранения после смерти
         private void DeleteSave()
         {
             string ext = _useXml ? ".xml" : ".json";
@@ -139,6 +170,7 @@ namespace DoodleJump.Views
             if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
         }
 
+        // Параллакс фона
         private void ScrollBackground(double scrollY)
         {
             _forestOffset += scrollY * 0.001; 
@@ -146,12 +178,13 @@ namespace DoodleJump.Views
             Canvas.SetTop(Forest1, _forestOffset);
             Canvas.SetTop(Forest2, _forestOffset - 850);
 
-            _fogOffset += scrollY * 0.0002;  
+            _fogOffset += scrollY * 0.0002; 
             if (_fogOffset >= 850) _fogOffset = 0;
             Canvas.SetTop(Fog1, _fogOffset);
             Canvas.SetTop(Fog2, _fogOffset - 850);
         }
 
+        // Пауза
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
             _isPaused = true;
@@ -160,6 +193,7 @@ namespace DoodleJump.Views
             GameWorld.Effect = new BlurEffect { Radius = 15 };
         }
 
+        // Снятие паузы
         private void BtnResume_Click(object sender, RoutedEventArgs e)
         {
             _isPaused = false;
@@ -169,6 +203,7 @@ namespace DoodleJump.Views
             _lastFrameTime = DateTime.Now;
         }
 
+        // Настройки
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
             var currentConfig = new AppConfig { SavePath = _savePath, UseXml = _useXml };
@@ -182,13 +217,7 @@ namespace DoodleJump.Views
             }
         }
 
-        private void BtnExit_Click(object sender, RoutedEventArgs e)
-        {
-            SaveProgress(); 
-            new StartWindow().Show();
-            this.Close();
-        }
-
+        // Рисование
         private void Draw()
         {
             foreach (Platform p in _engine.Platforms)
@@ -200,6 +229,7 @@ namespace DoodleJump.Views
             CleanupVisuals();
         }
 
+        // Создание визуальных объектов
         private void UpdateOrCreateVisual(GameObject obj, Brush fallbackColor)
         {
             if (!_visuals.ContainsKey(obj))
@@ -215,7 +245,6 @@ namespace DoodleJump.Views
                 else if (obj is Platform platBase) {
                     if (platBase.Width > 110) imageName = "long_platform.png";
                     else if (platBase.Width > 75) imageName = "middle_platform.png";
-                    else imageName = "short_platform.png";
                 }
 
                 img.Source = new BitmapImage(new Uri($"/Assets/{imageName}", UriKind.Relative));
@@ -232,7 +261,6 @@ namespace DoodleJump.Views
             if (obj is Player playerObj) {
                 Canvas.SetLeft(visual, obj.X - offsetX);
                 Canvas.SetTop(visual, obj.Y - (visual.Height - obj.Height) + 12); 
-
                 if (playerObj.VelocityX < 0) visual.RenderTransform = new ScaleTransform(-1, 1); 
                 else if (playerObj.VelocityX > 0) visual.RenderTransform = new ScaleTransform(1, 1);
                 visual.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -242,6 +270,7 @@ namespace DoodleJump.Views
             }
         }
 
+        // Удаление неактивных платформ
         private void CleanupVisuals()
         {
             var toRemove = _visuals.Keys
@@ -254,6 +283,7 @@ namespace DoodleJump.Views
             }
         }
 
+        // Сохранение
         private void SaveProgress()
         {
             if (_engine.IsGameOver) return;
@@ -269,11 +299,12 @@ namespace DoodleJump.Views
             else new JsonGameSerializer<GameState>().Serialize(fileName, state);
         }
 
+        // Загрузка
         private void LoadProgress()
         {
             string ext = _useXml ? ".xml" : ".json";
             string fullPath = System.IO.Path.Combine(_savePath, "savegame" + ext);
-            if (!System.IO.File.Exists(fullPath)) return;
+            if (!File.Exists(fullPath)) return;
             try {
                 GameState state = _useXml 
                     ? new XmlGameSerializer<GameState>().Deserialize(fullPath)
@@ -284,7 +315,7 @@ namespace DoodleJump.Views
                 Draw(); 
                 _lastFrameTime = DateTime.Now;
             } catch (Exception ex) {
-                MessageBox.Show($"Ошибка загрузки: {ex.Message}");
+                MessageBox.Show($"Ошибка загрузки сессии: {ex.Message}");
             }
         }
 

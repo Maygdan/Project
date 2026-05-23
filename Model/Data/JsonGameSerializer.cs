@@ -10,7 +10,6 @@ namespace Model.Data
             string json = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
-
         public override T Deserialize(string filePath)
         {
             EnsureFileExists(filePath);
