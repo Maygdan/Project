@@ -1,5 +1,6 @@
 namespace Model.Core
 {
+    // Обычный камень
     public class NormalPlatform : Platform
     {
         public NormalPlatform(double x, double y, int type = 1) : base(x, y, 80, 5) 

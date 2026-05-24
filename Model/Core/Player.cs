@@ -6,7 +6,7 @@ namespace Model.Core
         public double VelocityX { get; set; }
         
         private const double Gravity = 1150; 
-        private const double JumpForce = -850; // Сила, чтобы точно долетать
+        private const double JumpForce = -850; 
 
         public Player(double x, double y) : base(x, y, 35, 5) { } // Хитбокс только в ногах
 

@@ -1,13 +1,15 @@
+using Model.Data;
 namespace Model.Core
 {
-    // Абстрактный класс №1
+    // Главный шаблон для любого предмета в игре
     public abstract class GameObject
     {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public double X { get; set; } // Позиция по горизонтали
+        public double Y { get; set; } // Позиция по вертикали
+        public double Width { get; set; } // Ширина объекта
+        public double Height { get; set; } // Высота объекта
 
+        // Создание объекта с заданными размерами и координатами
         protected GameObject(double x, double y, double width, double height)
         {
             X = x;
@@ -16,8 +18,7 @@ namespace Model.Core
             Height = height;
         }
 
-        // Абстрактный метод, который каждый объект реализует по-своему
-        // Например, игрок падает, а платформа может двигаться или ломаться
+        // Обязательный метод обновления, который каждый предмет делает по-своему
         public abstract void Update(double deltaTime);
     }
 }
